@@ -1,36 +1,31 @@
 steps:
-  # 依存関係をインストールするステップ
-  - name: 'python:3.9-slim'
-    entrypoint: 'sh'
+  # 1️⃣ Docker イメージのビルド
+  - name: "gcr.io/cloud-builders/docker"
     args:
-      - '-c'
-      - |
-        echo "🔍 Checking workspace contents..."
-        ls -al
-        echo "⚙️ Installing dependencies..."
-        pip install --upgrade pip
-        pip install --target=/workspace/packages -r requirements.txt
-        echo "📦 Installed packages:"
-        pip list
-    env:
-      - "PYTHONPATH=/workspace/packages"
+      - "build"
+      - "-t"
+      - "us-central1-docker.pkg.dev/mimetic-obelisk-440100-n9/my-repo/clinical-api:latest"
+      - "."
 
-  # スクリプトを実行するステップ
-  - name: 'python:3.9-slim'
-    entrypoint: 'python'
+  # 2️⃣ Artifact Registry へプッシュ
+  - name: "gcr.io/cloud-builders/docker"
     args:
-      - '-c'
+      - "push"
+      - "us-central1-docker.pkg.dev/mimetic-obelisk-440100-n9/my-repo/clinical-api:latest"
+
+  # 3️⃣ Cloud Run へデプロイ
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "bash"
+    args:
+      - "-c"
       - |
-        import sys
-        sys.path.append('/workspace/packages')  # パスを追加
-        import requests
-        import pandas
-        print("✅ Successfully imported requests and pandas!")
-        exec(open("ClinicalTrials_gov_API.py").read())  # スクリプトを実行
-    env:
-      - "PYTHONPATH=/workspace/packages"
+        gcloud run deploy clinical-api \
+          --image us-central1-docker.pkg.dev/mimetic-obelisk-440100-n9/my-repo/clinical-api:latest \
+          --platform managed \
+          --region us-central1 \
+          --allow-unauthenticated
 
-options:
-  logging: CLOUD_LOGGING_ONLY
+images:
+  - "us-central1-docker.pkg.dev/mimetic-obelisk-440100-n9/my-repo/clinical-api:latest"
 
-timeout: 600s
+timeout: 900s
