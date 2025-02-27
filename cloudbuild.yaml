@@ -1,3 +1,6 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+
 steps:
   # 依存関係をインストールするステップ
   - name: 'python:3.9-slim'
@@ -15,15 +18,11 @@ steps:
 
   # スクリプトを実行するステップ
   - name: 'python:3.9-slim'
-    entrypoint: 'python'
+    entrypoint: 'sh'
     args:
       - '-c'
       - |
-        import sys
-        sys.path.append('/workspace/packages')  # パスを追加
-        import requests
-        import pandas
-        print("✅ Successfully imported requests and pandas!")
-        exec(open("ClinicalTrials_gov_API.py").read())  # スクリプトを実行
+        echo "🚀 Running script..."
+        PYTHONPATH="/workspace/packages:$PYTHONPATH" python ClinicalTrials_gov_API.py
 
 timeout: 600s
