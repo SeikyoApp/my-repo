@@ -1,17 +1,13 @@
 options:
-  logging: CLOUD_LOGGING_ONLY  # Cloud Logging のみに変更
+  logging: CLOUD_LOGGING_ONLY
 
 steps:
-  - name: 'python:3.9'
+  - name: 'python:3.9-slim'
     entrypoint: 'sh'
-    args: ['-c', 'pip install --upgrade pip && pip install nbconvert papermill']
+    args: ['-c', 'pip install --upgrade pip && pip install -r requirements.txt']
 
-  - name: 'python:3.9'
-    entrypoint: 'jupyter'
-    args: ['nbconvert', '--to', 'script', 'ClinicalTrials_gov_API.ipynb']
-
-  - name: 'python:3.9'
-    entrypoint: 'papermill'
-    args: ['ClinicalTrials_gov_API.ipynb', 'output.ipynb']
+  - name: 'python:3.9-slim'
+    entrypoint: 'python'
+    args: ['ClinicalTrials_gov_API.py']  # Jupyter Notebook ではなく、スクリプトとして実行
 
 timeout: 600s
