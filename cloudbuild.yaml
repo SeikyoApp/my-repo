@@ -1,19 +1,29 @@
-options:
-  logging: CLOUD_LOGGING_ONLY
-
 steps:
+  # 依存関係をインストールするステップ
   - name: 'python:3.9-slim'
     entrypoint: 'sh'
     args:
       - '-c'
       - |
-        ls -al  # `requirements.txt` がリポジトリにあるか確認
-        cat requirements.txt  # 中身を確認
-        pip install --upgrade pip &&
-        pip install -r requirements.txt
+        echo "🔍 Checking workspace contents..."
+        ls -al
+        echo "⚙️ Installing dependencies..."
+        pip install --upgrade pip
+        pip install --target=/workspace/packages -r requirements.txt
+        echo "📦 Installed packages:"
+        pip list
 
+  # スクリプトを実行するステップ
   - name: 'python:3.9-slim'
     entrypoint: 'python'
-    args: ['ClinicalTrials_gov_API.py']
+    args:
+      - '-c'
+      - |
+        import sys
+        sys.path.append('/workspace/packages')  # パスを追加
+        import requests
+        import pandas
+        print("✅ Successfully imported requests and pandas!")
+        exec(open("ClinicalTrials_gov_API.py").read())  # スクリプトを実行
 
 timeout: 600s
