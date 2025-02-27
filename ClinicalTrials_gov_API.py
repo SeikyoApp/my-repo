@@ -1,6 +1,12 @@
+import sys
+sys.path.append('/workspace/packages')  # Cloud Build のパッケージパスを追加
+
 import requests
 import pandas as pd
-from IPython.display import display
+from IPython.display import display  # これが必要ならそのまま
+
+print("✅ Successfully imported requests and pandas!")
+
 
 # ✅ API のエンドポイント
 BASE_URL = "https://clinicaltrials.gov/api/v2/studies"
